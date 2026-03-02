@@ -1,55 +1,121 @@
-import os
-import shutil
-import time
+import random
 
-# UI Colors
-CYAN = '\033[96m'
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-RESET = '\033[0m'
+# Predefined list of 5 words
+words = ["python", "intern", "coding", "laptop", "program"]
 
-def automate_files():
-    print(f"{CYAN}====================================")
-    print("   🚀 PYTHON FILE AUTOMATOR")
-    print(f"===================================={RESET}")
+# Hangman ASCII stages (7 stages including 0)
+hangman_stages = [
+    """
+       ------
+       |    |
+       |
+       |
+       |
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |
+       |
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |    |
+       |
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |   /|
+       |
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |   /|\\
+       |
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |   /|\\
+       |   /
+       |
+    =========
+    """,
+    """
+       ------
+       |    |
+       |    O
+       |   /|\\
+       |   / \\
+       |
+    =========
+    """
+]
 
-    # Define paths (You can change these to actual paths on your PC)
-    source_dir = "./my_downloads"
-    target_dir = "./organized_images"
+# Randomly choose a word
+chosen_word = random.choice(words)
+display_word = ["_"] * len(chosen_word)
 
-    # Create dummy folders for demonstration if they don't exist
-    if not os.path.exists(source_dir):
-        os.makedirs(source_dir)
-        # Create a dummy jpg to show it works
-        open(f"{source_dir}/photo1.jpg", 'a').close()
-        print(f"{YELLOW}Note: Created a dummy 'my_downloads' folder for demo.{RESET}")
+incorrect_guesses = 0
+max_incorrect = 6
+guessed_letters = []
 
-    try:
-        if not os.path.exists(target_dir):
-            os.makedirs(target_dir)
+print("🎮 Welcome to Hangman Game!")
+print("You have 6 incorrect guesses allowed.\n")
 
-        files = os.listdir(source_dir)
-        moved_count = 0
+# Game Loop
+while incorrect_guesses < max_incorrect and "_" in display_word:
+    
+    print(hangman_stages[incorrect_guesses])
+    print("Word:", " ".join(display_word))
+    print("Guessed Letters:", " ".join(guessed_letters))
+    
+    guess = input("Guess a letter: ").lower()
+    
+    if not guess.isalpha() or len(guess) != 1:
+        print("⚠ Please enter a single valid letter.\n")
+        continue
+    
+    if guess in guessed_letters:
+        print("⚠ You already guessed that letter.\n")
+        continue
+    
+    guessed_letters.append(guess)
+    
+    if guess in chosen_word:
+        print("✅ Correct guess!\n")
+        for i in range(len(chosen_word)):
+            if chosen_word[i] == guess:
+                display_word[i] = guess
+    else:
+        incorrect_guesses += 1
+        print(f"❌ Wrong guess! Attempts left: {max_incorrect - incorrect_guesses}\n")
 
-        print(f"Scanning {source_dir} for .jpg files...")
-        time.sleep(1)
+# Final Stage Display
+print(hangman_stages[incorrect_guesses])
 
-        for file in files:
-            if file.lower().endswith(".jpg"):
-                source_path = os.path.join(source_dir, file)
-                target_path = os.path.join(target_dir, file)
-                
-                # Move the file
-                shutil.move(source_path, target_path)
-                print(f"{GREEN}✔ Moved:{RESET} {file}")
-                moved_count += 1
-
-        print(f"\n{CYAN}--- Automation Complete ---{RESET}")
-        print(f"Total images moved: {moved_count}")
-        print(f"Files are now in: {os.path.abspath(target_dir)}")
-
-    except Exception as e:
-        print(f"\n❌ {RED}Error occurred:{RESET} {e}")
-
-if __name__ == "__main__":
-    automate_files()
+# Final Result
+if "_" not in display_word:
+    print("🎉 Congratulations! You won!")
+    print("The word was:", chosen_word)
+else:
+    print("💀 Game Over! You lost.")
+    print("The word was:", chosen_word)
